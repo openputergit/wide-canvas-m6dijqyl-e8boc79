@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dietician</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="text-xl font-bold text-gray-800">AI Dietician</div>
+                <div id="auth-buttons">
+                    <button onclick="showLoginModal()" class="text-blue-600 px-4">Login</button>
+                    <button class="bg-blue-600 text-white px-6 py-2 rounded-lg">Sign Up</button>
+                </div>
+                <div id="user-info" class="hidden">
+                    <span id="user-email" class="mr-4"></span>
+                    <button onclick="logout()" class="text-red-600">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg w-96">
+            <h2 class="text-2xl font-bold mb-4">Login</h2>
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 mb-4 border rounded">
+            <input type="password" id="password" placeholder="Password" class="w-full p-2 mb-4 border rounded">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded">Login</button>
+        </div>
+    </div>
+
+    <!-- Health Profile Modal -->
+    <div id="profile-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg w-96">
+            <h2 class="text-2xl font-bold mb-4">Health Profile</h2>
+            <input type="number" id="age" placeholder="Age" class="w-full p-2 mb-4 border rounded">
+            <select id="gender" class="w-full p-2 mb-4 border rounded">
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <input type="number" id="weight" placeholder="Weight (kg)" class="w-full p-2 mb-4 border rounded">
+            <input type="number" id="height" placeholder="Height (cm)" class="w-full p-2 mb-4 border rounded">
+            <select id="activity" class="w-full p-2 mb-4 border rounded">
+                <option value="">Activity Level</option>
+                <option value="sedentary">Sedentary</option>
+                <option value="moderate">Moderate</option>
+                <option value="active">Active</option>
+            </select>
+            <select id="goal" class="w-full p-2 mb-4 border rounded">
+                <option value="">Health Goal</option>
+                <option value="lose">Weight Loss</option>
+                <option value="maintain">Maintain Weight</option>
+                <option value="gain">Weight Gain</option>
+            </select>
+            <button onclick="generateDietPlan()" class="w-full bg-blue-600 text-white py-2 rounded">Generate Diet Plan</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="bg-blue-600 text-white pt-32 pb-20 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to AI Dietician</h1>
+            <p class="text-xl">Your personal health assistant</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">About Us</h2>
+            <p class="text-gray-600 text-center max-w-2xl mx-auto">
+                We use advanced AI technology to provide personalized diet plans that fit your lifestyle and health goals. Our mission is to make healthy eating accessible and enjoyable for everyone.
+            </p>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="bg-gray-50 py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-12 text-center">Our Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <i class="bi bi-clipboard2-pulse text-4xl text-blue-600"></i>
+                    <h3 class="text-xl font-bold mt-4 mb-2">Personalized Diet Plans</h3>
+                    <p class="text-gray-600">Custom nutrition plans based on your unique needs and goals</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <i class="bi bi-graph-up-arrow text-4xl text-blue-600"></i>
+                    <h3 class="text-xl font-bold mt-4 mb-2">Progress Tracking</h3>
+                    <p class="text-gray-600">Monitor your progress and adjust your plan accordingly</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <i class="bi bi-chat-dots text-4xl text-blue-600"></i>
+                    <h3 class="text-xl font-bold mt-4 mb-2">AI Support</h3>
+                    <p class="text-gray-600">24/7 AI-powered nutritional guidance and support</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Diet Plan Section -->
+    <section id="diet-plan-section" class="py-20 px-4 hidden">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">Your Personalized Diet Plan</h2>
+            <div id="diet-plan-content" class="bg-white p-6 rounded-lg shadow-md">
+                <!-- Diet plan will be inserted here -->
+            </div>
+            <button onclick="showProfileModal()" class="mt-8 mx-auto block bg-blue-600 text-white px-6 py-2 rounded-lg">
+                Edit Profile
+            </button>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Contact Us</h2>
+            <button class="bg-blue-600 text-white px-8 py-3 rounded-lg">Get in Touch</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p>© 2025 AI Dietician</p>
+        </div>
+    </footer>
+
+    <script>
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+
+        function showProfileModal() {
+            document.getElementById('profile-modal').classList.add('active');
+        }
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email && password) {
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('user-email').textContent = email;
+                document.getElementById('login-modal').classList.remove('active');
+                showProfileModal();
+            }
+        }
+
+        function logout() {
+            document.getElementById('auth-buttons').classList.remove('hidden');
+            document.getElementById('user-info').classList.add('hidden');
+            document.getElementById('diet-plan-section').classList.add('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        async function generateDietPlan() {
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const weight = document.getElementById('weight').value;
+            const height = document.getElementById('height').value;
+            const activity = document.getElementById('activity').value;
+            const goal = document.getElementById('goal').value;
+
+            if (age && gender && weight && height && activity && goal) {
+                document.getElementById('profile-modal').classList.remove('active');
+                document.getElementById('diet-plan-section').classList.remove('hidden');
+
+                const prompt = `Generate a personalized diet plan for a ${age} year old ${gender}, weighing ${weight}kg, ${height}cm tall, with ${activity} activity level, looking to ${goal} weight. Include daily calorie target and meal suggestions.`;
+
+                try {
+                    const response = await fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/ai', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer M0KEtmQP9LezPEDTzR5mXTZgZzl1',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            messages: [{
+                                role: "user",
+                                content: [{
+                                    type: "text",
+                                    text: prompt
+                                }]
+                            }]
+                        })
+                    });
+
+                    const data = await response.json();
+                    const dietPlan = data.message;
+                    
+                    document.getElementById('diet-plan-content').innerHTML = `
+                        <div class="prose max-w-none">
+                            ${dietPlan.split('\n').map(line => `<p>${line}</p>`).join('')}
+                        </div>
+                    `;
+
+                    window.scrollTo({
+                        top: document.getElementById('diet-plan-section').offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                } catch (error) {
+                    console.error('Error generating diet plan:', error);
+                }
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
